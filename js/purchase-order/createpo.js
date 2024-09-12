@@ -202,7 +202,7 @@ $(document).ready(function() {
         let qtySold = $('#qty_sold').val();
         let prodOPrice = $('#prodOPrice').val();
         let prodSPrice = $('#prodSPrice').val();
-        let totalPrice = parseFloat($('#totalPrice').val());
+        let total_price = parseFloat($('#totalPrice').val());
         let status = $('#status').val();
         let action = `<button class="btn btn-primary btn-sm btnEdit" data-id="${id}">
             <i class="fas fa-edit"></i>
@@ -211,7 +211,7 @@ $(document).ready(function() {
             <i class="fas fa-trash-alt"></i>
         </button>`;
     
-        if (!prodID || !prodName || !prodBrand || !prodType || !qtySold || !prodOPrice || !prodSPrice || !totalPrice || !status) {
+        if (!prodID || !prodName || !prodBrand || !prodType || !qtySold || !prodOPrice || !prodSPrice || !total_price || !status) {
             $("#errorMsg").html('<div class="alert alert-warning py-2 px-3"><i class="icon fa fa-warning"></i>&nbsp; Incomplete Fields. Please fill out all fields.<button type="button" class="close mt-n1" data-dismiss="alert"><small>&times;</small></button></div>');
         } else {
             $("#errorMsg").empty();
@@ -225,16 +225,16 @@ $(document).ready(function() {
                     totalall -= items[itemIndex].t;
     
                     // Update the item in the array
-                    items[itemIndex].qtySold = qtySold;
-                    items[itemIndex].totalPrice = totalPrice;
+                    items[itemIndex].qtySold = parseFloat(qtySold);
+                    items[itemIndex].total_price = parseFloat(total_price);
                     items[itemIndex].prodID = prodID;
                     items[itemIndex].prodName = prodName;
                     items[itemIndex].prodBrand = prodBrand;
                     items[itemIndex].prodType = prodType;
-                    items[itemIndex].prodOPrice = prodOPrice;
-                    items[itemIndex].prodSPrice = prodSPrice;
+                    items[itemIndex].prodOPrice = parseFloat(prodOPrice);
+                    items[itemIndex].prodSPrice = parseFloat(prodSPrice);
                     items[itemIndex].status = status;
-                    items[itemIndex].t = parseFloat(totalPrice);
+                    // items[itemIndex].t = parseFloat(total_price);
                     items[itemIndex].action = action;
     
                     // Add the new total back to totalall
@@ -250,27 +250,28 @@ $(document).ready(function() {
                 // If not updating, add a new item as usual
                 items.push({
                     index: index,
-                    t: parseFloat(totalPrice),
-                    qtySold: qtySold,
-                    totalPrice: totalPrice,
+                    // t: parseFloat(total_price),
+                    qtySold: parseFloat(qtySold),
+                    total_price: parseFloat(total_price),
+                    prodOPrice: parseFloat(prodOPrice),
+                    prodSPrice: parseFloat(prodSPrice),
                     prodID, 
                     prodName, 
                     prodBrand, 
-                    prodType, 
-                    prodOPrice, 
-                    prodSPrice, 
+                    prodType,
                     status, 
                     action
                 });
                 index++;
     
                 // Add the total price of the new item to totalall
-                totalall += parseFloat(totalPrice);
+                totalall += parseFloat(total_price);
             }
     
             // Hide the modal and update total sales display
             $('#addProductModal').modal('hide');
-            $('#totalSales').text('₱ ' + formatNumber(totalall));
+            $('#totalSales').text(formatNumber(totalall));
+            $('#totalSales').val('₱ '+ formatNumber(totalall));
     
             // Update the item table with the modified data
             item_table();
@@ -332,7 +333,7 @@ $(document).ready(function() {
             $('#qty_sold').val(found.qtySold);
             $('#prodOPrice').val(found.prodOPrice);
             $('#prodSPrice').val(found.prodSPrice);
-            $('#totalPrice').val(found.totalPrice);
+            $('#totalPrice').val(found.total_price);
             $('#status').val(found.status);
     
             // Set the button text to indicate update mode
@@ -344,6 +345,81 @@ $(document).ready(function() {
             $('#addProductModal').modal('show');
         }
     });
+
+    $('#btnBack').on('click', function(){
+        window.history.back();
+    });
+
+    $('#btnSavePO').on('click', function() {
+        let custName = $('#customer_name').text();
+        let purchaseDate = $('#purchase_date').val();
+        let totalSales = $('#totalSales').text();
+        let MOP = $('#MOP').val();
+
+        let formData = {
+            custName: custName,
+            purchaseDate: purchaseDate,
+            totalSales: parseFloat(totalSales),
+            MOP: MOP,
+            items: items,
+        };
+
+        console.log(formData);
+
+        swal({
+            title: "Confirm",
+            text: "Are you sure you want to save the items?",
+            icon: "warning",
+            buttons: ["Cancel", "Save"],
+            dangerMode: false,
+        })
+        .then((willSave) => {
+            if (willSave) {
+                axios.post('http://localhost/avhAPI-dev/public/api/purchaseOrder', formData, {
+                    headers: {
+                        'Authorization' : 'Bearer '+ token,
+                        'Accept'  : 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    console.log(response);
+                    var data = response.data;
+    
+                    if (data.hasOwnProperty('error')) {
+                        // If the response contains an error message, display it
+                        swal({
+                            title: "Error!",
+                            text: data.error,
+                            icon: "error",
+                            button: "OK",
+                        });
+                    } else {
+                        // Otherwise, display success message
+                        swal({
+                            title: "Purchase Successful",
+                            text: "The item has been purchased. Proceed to saleslist for receipt.",
+                            icon: "success",
+                            button: "OK",
+                        })
+                        .then((okClicked) => {
+                            if (okClicked) {
+                                // window.history.back();
+                            }
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.log(error);
+                    swal({
+                        title: "Error",
+                        text: "An error occurred while processing your request.",
+                        icon: "error",
+                        button: "OK",
+                    });
+                });
+            }
+        });
+    })
     
 });
 
@@ -366,7 +442,7 @@ function item_table() {
             {data: 'prodType', title:'Type'},
             {data: 'qtySold', title:'Qty Sold'},
             {data: 'prodSPrice', title:'Price'},
-            {data: 'totalPrice', title:'Total Price'},
+            {data: 'total_price', title:'Total Price'},
             {data: 'status', title:'Status'},
             {data: 'action', title:'Action'},
         ]

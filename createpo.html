@@ -20,8 +20,11 @@
     <!-- Custom styles for this template-->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <!-- Sweetalerts -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.all.min.js"></script>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.all.min.js"></script> -->
+    <!-- Sweetalerts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 
     <!-- alert -->
     <link href="css/alert.css" rel="stylesheet">
@@ -290,7 +293,27 @@
                                 <button type="button" class="btn btn-default btn-md text-right"  style="border: 1px solid #ccc;">
                                         <i class="fa fa-money pr-4"></i> Total Sales
                                 </button>
-                                <button type="button" class="btn btn-primary btn-md text-right" id="totalSales" style="border: 1px solid #ccc;">₱ 0.00</button>
+                                <!-- <button type="button" class="btn btn-primary btn-md text-right" id="totalSales" style="border: 1px solid #ccc;">₱ 0.00</button> -->
+                                <input type="button" class="btn btn-primary btn-md text-right" id="totalSales" style="border: 1px solid #ccc;" value="0.00">
+                            </div>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <div class="btn-group float-right">
+                                <button type="button" id="btnBack" class="btn btn-secondary btn-icon-split btn-md">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </span>
+                                    <span class="text">Back</span>
+                                </button>
+                                &nbsp;
+                                <button type="button" id='btnSavePO' class="btn btn-success btn-icon-split btn-md">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-save"></i>
+                                    </span>
+                                    <span class="text">Save</span>
+                                </button>
                             </div>
                         </div>
                         
