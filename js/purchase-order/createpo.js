@@ -1,5 +1,5 @@
 let items = []; let index = 0;
-var id =0 ;
+var id;
 $(document).ready(function() {
     var totalall = 0;
     
@@ -204,10 +204,10 @@ $(document).ready(function() {
         let prodSPrice = $('#prodSPrice').val();
         let total_price = parseFloat($('#totalPrice').val());
         let status = $('#status').val();
-        let action = `<button class="btn btn-primary btn-sm btnEdit" data-id="${id}">
+        let action = `<button class="btn btn-primary btn-sm btnEdit" data-id="${index}">
             <i class="fas fa-edit"></i>
         </button>
-        <button class="btn btn-danger btn-sm btnDelete" data-id="${id}">
+        <button class="btn btn-danger btn-sm btnDelete" data-id="${index}">
             <i class="fas fa-trash-alt"></i>
         </button>`;
     
@@ -234,15 +234,18 @@ $(document).ready(function() {
                     items[itemIndex].prodOPrice = parseFloat(prodOPrice);
                     items[itemIndex].prodSPrice = parseFloat(prodSPrice);
                     items[itemIndex].status = status;
-                    // items[itemIndex].t = parseFloat(total_price);
-                    items[itemIndex].action = action;
-    
+                    items[itemIndex].t = parseFloat(total_price);
+                    // items[itemIndex].action = action;
+
+                    // $('#btnEdit').data('id', items[itemIndex].id);
                     // Add the new total back to totalall
                     totalall += items[itemIndex].t;
+
+
                 }
     
                 // Reset `id` and update button state after saving
-                id = null;
+                id = 0;
                 $('#addProduct').text('Add Product');
                 $('#addProduct').removeClass('btnUpdate');
                 $('#addProduct').addClass('addProduct');
@@ -250,7 +253,7 @@ $(document).ready(function() {
                 // If not updating, add a new item as usual
                 items.push({
                     index: index,
-                    // t: parseFloat(total_price),
+                    t: parseFloat(total_price),
                     qtySold: parseFloat(qtySold),
                     total_price: parseFloat(total_price),
                     prodOPrice: parseFloat(prodOPrice),
@@ -270,8 +273,8 @@ $(document).ready(function() {
     
             // Hide the modal and update total sales display
             $('#addProductModal').modal('hide');
-            $('#totalSales').text(formatNumber(totalall));
-            $('#totalSales').val('₱ '+ formatNumber(totalall));
+            $('#totalSales').text(parseFloat(totalall));
+            $('#totalSales').val(parseFloat(totalall));
     
             // Update the item table with the modified data
             item_table();
@@ -321,13 +324,27 @@ $(document).ready(function() {
     $('#tableItems').on('click', '.btnEdit', function() {
         // Capture the correct item id (index) when editing
         id = $(this).data('id');
+        // return alert(id);
+
+        $('#id').val('');
+        $('#product_name').empty();
+        $('#prod_brand').val('');
+        $('#prod_type').val('');
+        $('#qty_sold').val('');
+        $('#prodOPrice').val('');
+        $('#prodSPrice').val('');
+        $('#totalPrice').val('');
         
         // Find the item to be edited
         const found = items.find(item => item.index == id); 
     
         if (found) {
             // Populate the modal with the existing data
-            $('#product_name').val(found.prodID);
+            $('#product_name').val(found.prodID).trigger('change');  // Set the prodID and trigger change event
+    
+            // Set the text inside the select2 to prodName if it's not already present
+            let newOption = new Option(found.prodName, found.prodID, true, true); 
+            $('#product_name').append(newOption).trigger('change');
             $('#prod_brand').val(found.prodBrand);
             $('#prod_type').val(found.prodType);
             $('#qty_sold').val(found.qtySold);
@@ -337,6 +354,7 @@ $(document).ready(function() {
             $('#status').val(found.status);
     
             // Set the button text to indicate update mode
+            $('#addProductModalLabel').text('Update Product');
             $('#addProduct').text('Save');
             $('#addProduct').addClass('btnUpdate');
             $('#addProduct').removeClass('addProduct');
@@ -348,6 +366,26 @@ $(document).ready(function() {
 
     $('#btnBack').on('click', function(){
         window.history.back();
+    });
+
+    $('#tableItems').on('click','.btnDelete', function(){
+        // Assuming `this` refers to the clicked btnDelete
+    const itemIndex = $(this).data('id'); // Get the data-id, which is the index
+
+    if (itemIndex > -1) {
+        // Subtract the total of the item from totalall before deleting
+        totalall -= items[itemIndex].t;
+        
+        // Remove the item from the items array
+        items.splice(itemIndex, 1);
+        
+        // Optionally, update the UI to reflect the deletion
+        $(this).closest('tr').remove(); // Assuming you're removing a table row
+        
+        $('#totalSales').text(parseFloat(totalall));
+        $('#totalSales').val(parseFloat(totalall));
+    }
+
     });
 
     $('#btnSavePO').on('click', function() {
@@ -397,13 +435,13 @@ $(document).ready(function() {
                         // Otherwise, display success message
                         swal({
                             title: "Purchase Successful",
-                            text: "The item has been purchased. Proceed to saleslist for receipt.",
+                            text: "The Purchase Order was created successfully. Refer to " + data.transNo,
                             icon: "success",
                             button: "OK",
-                        })
+                        })                        
                         .then((okClicked) => {
                             if (okClicked) {
-                                // window.history.back();
+                                window.history.back();
                             }
                         });
                     }
@@ -420,6 +458,17 @@ $(document).ready(function() {
             }
         });
     })
+
+    window.onload = function() {
+        // Parse URL parameters
+        var urlParams = new URLSearchParams(window.location.search);
+        
+        // Get the transNo and set it to the element with id 'transNo'
+        var transNo = urlParams.get('transNo');
+        if (transNo) {
+            document.getElementById('transNo').textContent = transNo;
+        }
+    };    
     
 });
 
